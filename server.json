@@ -1,0 +1,13 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.aymanesamhi1234-collab/a2p32-mcp",
+  "description": "MCP client for A2P-32 Guard: per-aspect limits for agent budgets, API rates, DB writes and transfers, with all-or-nothing batches. Free tools plus a paid x402 guard endpoint.",
+  "version": "3.2.0",
+  "repository": {
+    "url": "https://github.com/aymanesamhi1234-collab/a2p32-mcp",
+    "source": "github"
+  },
+  "websiteUrl": "https://zealous-unburned-tameness.ngrok-free.dev",
+  "license": "MIT",
+  "keywords": ["mcp", "x402", "ai-agents", "guardrails", "budget", "usdc", "base"]
+}
