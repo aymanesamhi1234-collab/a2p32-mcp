@@ -31,7 +31,7 @@ No dependencies beyond the Python standard library (3.10+).
     "a2p32-guard": {
       "command": "python3",
       "args": ["/absolute/path/to/bridge.py"],
-      "env": { "A2P_MCP_URL": "https://zealous-unburned-tameness.ngrok-free.dev/mcp" }
+      "env": { "A2P_MCP_URL": "https://quest-mails-tour-workers.trycloudflare.com/mcp" }
     }
   }
 }
