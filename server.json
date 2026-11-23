@@ -1,7 +1,7 @@
 {
-  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
-  "name": "io.github.aymanesamhi1234-collab/a2p32-mcp",
-  "description": "MCP client for A2P-32 Guard: per-aspect limits for agent budgets, API rates, DB writes and transfers, with all-or-nothing batches. Free tools plus a paid x402 guard endpoint.",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "org.duckdns.a2p32guard/a2p32-guard",
+  "description": "Per-aspect limits for agent budgets, API rates and transfers; atomic batches.",
   "version": "3.2.0",
   "repository": {
     "url": "https://github.com/aymanesamhi1234-collab/a2p32-mcp",
@@ -9,5 +9,10 @@
   },
   "websiteUrl": "https://zealous-unburned-tameness.ngrok-free.dev",
   "license": "MIT",
-  "keywords": ["mcp", "x402", "ai-agents", "guardrails", "budget", "usdc", "base"]
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://zealous-unburned-tameness.ngrok-free.dev/mcp"
+    }
+  ]
 }
