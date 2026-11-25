@@ -17,12 +17,16 @@ Requires: pip install eth-account
 from __future__ import annotations
 
 import base64
+import http.client
 import json
 import os
+import ssl
+import threading
 import time
 import urllib.error
 import urllib.request
 from typing import Any, Dict, Optional
+from urllib.parse import urlsplit
 
 GUARD = os.environ.get("A2P_GUARD", "https://zealous-unburned-tameness.ngrok-free.dev")
 
@@ -36,8 +40,60 @@ class Denied(Exception):
     """El guard o el tope local han rechazado el pago."""
 
 
+_CONN: Dict[tuple, Any] = {}
+_CONN_LOCK = threading.Lock()
+_CODE_CACHE: Dict[tuple, tuple] = {}
+
+
+def _conexion(host: str, scheme: str, timeout: int):
+    """Conexion reutilizable por host: un TLS por proceso, no uno por llamada."""
+    clave = (scheme, host)
+    with _CONN_LOCK:
+        c = _CONN.get(clave)
+        if c is None:
+            if scheme == "https":
+                c = http.client.HTTPSConnection(
+                    host, timeout=timeout, context=ssl.create_default_context())
+            else:
+                c = http.client.HTTPConnection(host, timeout=timeout)
+            _CONN[clave] = c
+        return c
+
+
+def _http(url: str, body: Any = None, headers: Optional[Dict[str, str]] = None,
+          timeout: int = 90):
+    """POST/GET con keep-alive. urllib abria un TLS nuevo en cada llamada
+    (~170 ms cada uno); reutilizar la conexion deja el coste en el RTT (~80 ms).
+    """
+    partes = urlsplit(url)
+    host = partes.netloc
+    ruta = partes.path or "/"
+    if partes.query:
+        ruta += "?" + partes.query
+    datos = json.dumps(body).encode() if body is not None else None
+    cabeceras = {"Content-Type": "application/json", **(headers or {})}
+    for intento in (1, 2):
+        c = _conexion(host, partes.scheme, timeout)
+        try:
+            c.request("POST" if datos is not None else "GET", ruta,
+                      body=datos, headers=cabeceras)
+            r = c.getresponse()
+            crudo = r.read()
+            return r.status, dict(r.getheaders()), crudo
+        except (http.client.HTTPException, OSError):
+            with _CONN_LOCK:
+                _CONN.pop((partes.scheme, host), None)
+            try:
+                c.close()
+            except Exception:
+                pass
+            if intento == 2:
+                raise
+    raise RuntimeError("sin conexion")
+
+
 def _code(payer: str, chain: int) -> str:
-    """Codigo en la cuenta del pagador. '' si no se puede consultar.
+    """Codigo en la cuenta del pagador, cacheado 60 s.
 
     Un EOA normal devuelve '0x'. Si devuelve algo, la cuenta tiene una
     delegacion EIP-7702 (o es un contrato) y USDC validara la firma por
@@ -46,29 +102,22 @@ def _code(payer: str, chain: int) -> str:
     url = RPC.get(chain)
     if not url:
         return ""
-    req = urllib.request.Request(
-        url, data=json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_getCode",
-                              "params": [payer, "latest"]}).encode(),
-        headers={"Content-Type": "application/json",
-                 "User-Agent": "guardpay/1.0"})
+    clave = (payer.lower(), chain)
+    ahora = time.time()
+    with _CONN_LOCK:
+        visto = _CODE_CACHE.get(clave)
+        if visto and ahora - visto[1] < 60:
+            return visto[0]
     try:
-        with urllib.request.urlopen(req, timeout=8) as r:
-            return json.loads(r.read()).get("result", "")
+        s, _, raw = _http(url, {"jsonrpc": "2.0", "id": 1, "method": "eth_getCode",
+                                "params": [payer, "latest"]},
+                          {"User-Agent": "guardpay/1.0"}, timeout=8)
+        code = json.loads(raw).get("result", "") if s == 200 else ""
     except Exception:
         return ""
-
-
-def _http(url: str, body: Any = None, headers: Optional[Dict[str, str]] = None,
-          timeout: int = 90):
-    datos = json.dumps(body).encode() if body is not None else None
-    req = urllib.request.Request(
-        url, data=datos, method="POST" if datos is not None else "GET",
-        headers={"Content-Type": "application/json", **(headers or {})})
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            return r.status, dict(r.headers), r.read()
-    except urllib.error.HTTPError as exc:
-        return exc.code, dict(exc.headers), exc.read()
+    with _CONN_LOCK:
+        _CODE_CACHE[clave] = (code, ahora)
+    return code
 
 
 class GuardPay:
@@ -79,20 +128,34 @@ class GuardPay:
         self.key = key
         self.guard = guard.rstrip("/")
 
-    def preflight(self, amount_usd: float) -> Dict[str, Any]:
-        """Pregunta gratis al guard si el importe cabe. Lanza Denied si no."""
-        url = (f"{self.guard}/v1/check?budget={self.budget}"
-               f"&spent={self.spent}&amount={amount_usd}")
-        code, _, raw = _http(url)
-        try:
-            d = json.loads(raw or b"{}")
-        except json.JSONDecodeError:
-            raise Denied(f"guard no responde ({code})")
-        if code != 200:
-            raise Denied(f"guard HTTP {code}")
-        if not d.get("allow"):
-            raise Denied(f"guard: {d.get('reason')} · quedan {d.get('remaining_before')}")
-        return d
+    def preflight(self, amount_usd: float, remote: Optional[bool] = None) -> Dict[str, Any]:
+        """Comprueba que el importe cabe en el presupuesto. Lanza Denied si no.
+
+        La regla es la misma que aplica /v1/check, asi que se calcula en local:
+        una ronda HTTP extra (~80-180 ms) para repetir una resta no aporta nada.
+        Con A2P_REMOTE_PREFLIGHT=1 (o remote=True) se consulta al guard.
+        """
+        if remote is None:
+            remote = os.environ.get("A2P_REMOTE_PREFLIGHT") == "1"
+        if remote:
+            url = (f"{self.guard}/v1/check?budget={self.budget}"
+                   f"&spent={self.spent}&amount={amount_usd}")
+            code, _, raw = _http(url)
+            try:
+                d = json.loads(raw or b"{}")
+            except json.JSONDecodeError:
+                raise Denied(f"guard no responde ({code})")
+            if code != 200:
+                raise Denied(f"guard HTTP {code}")
+            if not d.get("allow"):
+                raise Denied(f"guard: {d.get('reason')} · quedan {d.get('remaining_before')}")
+            return d
+        antes = self.budget - self.spent
+        if amount_usd > antes:
+            raise Denied(f"presupuesto: {amount_usd} > quedan {antes:.6f}")
+        return {"allow": True, "remaining_before": round(antes, 6),
+                "remaining_after": round(antes - amount_usd, 6),
+                "price_usdc": 0, "checked": "local"}
 
     def pay(self, url: str, body: Any = None, max_usd: Optional[float] = None,
             headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:

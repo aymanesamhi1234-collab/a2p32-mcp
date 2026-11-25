@@ -59,18 +59,25 @@ token burn, queue batch size, retry loop and session lock.
 
 ## Numbers (measured, not claimed)
 
-Measured 2026-11-25 with `bench_publico.py --n 200 --c 8`:
+Measured 2026-11-25, keep-alive connections:
 
-| what | p50 | p95 | p99 | rate |
-|---|---|---|---|---|
-| public endpoint (tunnel edge) | 94.1 ms | 126.0 ms | 178.3 ms | 9.8 req/s |
-| local engine | 1.8 ms | 3.4 ms | 5.6 ms | 412.7 req/s |
-| engine, 1 producer | 88 ns/order (11.2 M/s) | | | |
-| engine, 4 producers, batches of 32 | 23.9 ns/order (41.9 M/s) | | | |
-| 402 challenge incl. CDP verify | 2,953 ms (engine adds < 0.2 ms) | | | |
+| what | p50 | p95 | rate |
+|---|---|---|---|
+| server, 1 connection (local) | 0.25 ms | 0.49 ms | 4,000 req/s |
+| server, 8 connections (local) | 0.53 ms | — | 11,600 req/s |
+| public endpoint, keep-alive (tunnel) | 80 ms | 126 ms | 78 req/s (8 conns) |
+| public endpoint, new connection | 175 ms | — | 9.8 req/s |
+| paid call end to end (guardpay, warm) | 345 ms | — | — |
+| CDP verify (warm) | 165 ms | — | — |
+| engine, 1 producer | 88 ns/order (11.2 M/s) | | |
+| engine, 4 producers, batches of 32 | 23.9 ns/order (41.9 M/s) | | |
 
-Raw data: `/bench.json` on the endpoint. Public latency is the tunnel edge, not
-the engine.
+Public latency is the tunnel round trip (2 × ~40 ms to the edge); the server
+itself answers in 0.25 ms. Reuse connections: a new TLS handshake costs ~95 ms
+on top of the trip.
+
+Raw data: `/bench.json` on the endpoint.
+
 
 ## What it saves
 
