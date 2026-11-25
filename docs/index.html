@@ -60,6 +60,49 @@
   <p>Fallback endpoint if the primary is unreachable:
   <code>https://a2p32guard.loca.lt/mcp</code></p>
 
+  <h2>Try it right here</h2>
+  <p>Ask the guard whether an amount fits a budget. This calls the live service from your browser.</p>
+  <div class="card" style="display:grid;gap:10px;max-width:560px">
+    <label>Daily budget (USD)
+      <input id="b" type="number" value="50" step="0.01" style="width:100%"></label>
+    <label>Already spent (USD)
+      <input id="s" type="number" value="12.4" step="0.01" style="width:100%"></label>
+    <label>Amount to pay (USD)
+      <input id="a" type="number" value="0.05" step="0.01" style="width:100%"></label>
+    <button id="go" style="padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--acc);color:#04120c;font-weight:700;cursor:pointer">Check</button>
+    <pre id="out" style="margin:0">—</pre>
+  </div>
+  <p>Savings for a batch of 30:
+    <button id="sav" style="padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer">calculate</button>
+    <span id="savout" style="color:var(--dim)">—</span></p>
+  <p style="color:var(--dim)">Live traffic: <span id="stats">…</span></p>
+
+  <script>
+  const API = "https://zealous-unburned-tameness.ngrok-free.dev";
+  document.getElementById("go").onclick = async () => {
+    const q = new URLSearchParams({
+      budget: document.getElementById("b").value,
+      spent: document.getElementById("s").value,
+      amount: document.getElementById("a").value});
+    try {
+      const r = await fetch(API + "/v1/check?" + q);
+      document.getElementById("out").textContent = JSON.stringify(await r.json(), null, 1);
+    } catch (e) { document.getElementById("out").textContent = "error: " + e; }
+  };
+  document.getElementById("sav").onclick = async () => {
+    try {
+      const r = await fetch(API + "/v1/savings?actions=30");
+      const d = await r.json();
+      document.getElementById("savout").textContent =
+        d.tokens.saved + " tokens saved (" + d.tokens.factor + "x)";
+    } catch (e) { document.getElementById("savout").textContent = "error: " + e; }
+  };
+  fetch(API + "/stats").then(r => r.json()).then(d => {
+    document.getElementById("stats").textContent =
+      d.handshakes + " handshakes from " + Object.keys(d.clients).length + " clients";
+  }).catch(() => {});
+  </script>
+
   <h2>Try without a wallet</h2>
 <pre>curl -s https://zealous-unburned-tameness.ngrok-free.dev/v1/trial
 # {"token":"...","calls":10,"left":10}

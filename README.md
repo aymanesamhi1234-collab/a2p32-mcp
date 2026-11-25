@@ -89,6 +89,7 @@ curl -s "https://zealous-unburned-tameness.ngrok-free.dev/v1/savings?actions=30"
 ## Pricing (x402 v2 on Base)
 
     Simulate                 free (120/min)
+    Up to 5 actions          free, always (120/min)
     First 50 paid calls/day  0.0010 USDC
     Up to 30 actions         0.0050 USDC
     31–256 actions           0.0150 USDC
