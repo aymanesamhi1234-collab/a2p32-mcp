@@ -88,6 +88,21 @@ Raw data: `/bench.json` on the endpoint.
 Measured comparison of the guard endpoints in this market (price and 402
 latency, same machine, same day): <https://aymanesamhi1234-collab.github.io/a2p32-mcp/guards.html>
 
+## Verified end to end (Base Sepolia, 2026-11-25)
+
+A real settlement through the CDP facilitator, no mock: fresh payer wallet funded
+from the CDP faucet, six-order paid batch, HTTP 200, and the receipt header
+`X-PAYMENT-RESPONSE` carrying the transaction hash.
+
+- tx: <https://sepolia.basescan.org/tx/0xf0b54916d14feec3508c88631dbfa461105ca5b670587c46df114d94ca8cf596>
+- status 1, 86,262 gas, logs `AuthorizationUsed` + `Transfer` on USDC
+- payer −0.001 USDC, seller +0.001; four paid calls moved 0.004 USDC in total
+- paid call end to end (verify + on-chain settle + task): 1.0–1.4 s
+- the engine itself adds ~80 µs to that call
+
+Mainnet is the same code and a funded wallet; the only difference is the chain id
+and the USDC address.
+
 ## What it saves
 
 | case | without | with | saving |
