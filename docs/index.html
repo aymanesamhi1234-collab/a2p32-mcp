@@ -95,6 +95,28 @@ curl -s -X POST https://zealous-unburned-tameness.ngrok-free.dev/ \
   <p><a href="./bench.json">Raw data</a>, measured 2026-11-25 with
   <code>bench_publico.py --n 200 --c 8</code>. Public latency is the tunnel edge, not the engine.</p>
 
+  <h2>What it saves</h2>
+  <table>
+    <tr><th>Case</th><th>Without</th><th>With</th><th>Saving</th></tr>
+    <tr><td>An agent doing 30 governance actions</td><td>30 calls · ~4,170 tokens</td>
+        <td>1 batch · ~390 tokens</td><td>10.7x fewer tokens</td></tr>
+    <tr><td>Price of one batch of 30</td>
+        <td>median guard listing: 0.0075 USDC per decision</td>
+        <td>0.0050 USDC per batch (0.00017/action)</td>
+        <td>one batch costs less than one decision elsewhere</td></tr>
+    <tr><td>Gas for the buyer</td><td>—</td><td>0 (CDP facilitator settles)</td><td>no gas</td></tr>
+    <tr><td>Runaway loop with a $50/day budget</td><td>spends until the card stops it</td>
+        <td>blocked at the cap</td><td>loss prevented</td></tr>
+  </table>
+
+  <h2>Free preflight — no wallet</h2>
+  <p>Any agent can ask whether an amount fits the budget before paying. No account, no token:</p>
+<pre>curl -s "https://zealous-unburned-tameness.ngrok-free.dev/v1/check?budget=50&spent=12.4&amount=0.05"
+# {"allow": true, "remaining_before": 37.6, "remaining_after": 37.55, "price_usdc": 0}
+
+curl -s "https://zealous-unburned-tameness.ngrok-free.dev/v1/savings?actions=30"
+# 390 vs 4,170 tokens · 10.69x</pre>
+
   <h2>Pricing</h2>
   <table>
     <tr><th>Operation</th><th>Price</th><th>Note</th></tr>

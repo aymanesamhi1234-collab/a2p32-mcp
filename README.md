@@ -61,6 +61,21 @@ Measured 2026-11-25 with `bench_publico.py --n 200 --c 8`:
 Raw data: `/bench.json` on the endpoint. Public latency is the tunnel edge, not
 the engine.
 
+## What it saves
+
+| case | without | with | saving |
+|---|---|---|---|
+| 30 governance actions | 30 calls · ~4,170 tokens | 1 batch · ~390 tokens | 10.7x fewer tokens |
+| price of one batch of 30 | median guard listing: 0.0075 USDC per decision | 0.0050 USDC per batch | one batch < one decision elsewhere |
+| buyer gas | — | 0 (CDP facilitator) | no gas |
+
+Free preflight without a wallet:
+
+```bash
+curl -s "https://zealous-unburned-tameness.ngrok-free.dev/v1/check?budget=50&spent=12.4&amount=0.05"
+curl -s "https://zealous-unburned-tameness.ngrok-free.dev/v1/savings?actions=30"
+```
+
 ## Pricing (x402 v2 on Base)
 
     Simulate                 free (120/min)
