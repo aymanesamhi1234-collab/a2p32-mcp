@@ -40,8 +40,9 @@ curl -s https://zealous-unburned-tameness.ngrok-free.dev/v1/trial
 
 Use it as `Authorization: Bearer trial:<token>` against the paid tool. One token
 per IP per day, 10 calls. When it runs out you get a normal 402 and pay with
-x402. MCP clients get the same 10 free `a2p3_guard` calls per IP and day without
-any header, so the first tool call just works.
+x402. MCP clients get the same free `a2p3_guard` calls per IP and day without any
+header, so the first tool call just works. The free quota grows with daily use:
+10 calls on day one, +5 per consecutive day, up to 50.
 
 ## Tools
 
