@@ -57,6 +57,12 @@ header, so the first tool call just works. The free quota grows with daily use:
 Limits you can enforce: daily budget, API rate, write quota, transfer cap,
 token burn, queue batch size, retry loop and session lock.
 
+## Use it from your agent
+
+Copy-paste tools for LangChain (Python) and the Vercel AI SDK (TypeScript), plus
+the MCP config: [`integrations/`](integrations/). The first 5 actions of a call
+are free, so they work with no wallet.
+
 ## Numbers (measured, not claimed)
 
 Measured 2026-11-25, keep-alive connections:

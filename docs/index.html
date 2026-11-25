@@ -163,15 +163,18 @@ curl -s -X POST https://zealous-unburned-tameness.ngrok-free.dev/ \
 
   <h2>Numbers (measured)</h2>
   <table>
-    <tr><th>Test</th><th>p50</th><th>p95</th><th>p99</th><th>Rate</th></tr>
-    <tr><td>Public (tunnel edge)</td><td>94.1 ms</td><td>126.0 ms</td><td>178.3 ms</td><td>9.8 req/s</td></tr>
-    <tr><td>Local</td><td>1.8 ms</td><td>3.4 ms</td><td>5.6 ms</td><td>412.7 req/s</td></tr>
-    <tr><td>Engine, 1 producer</td><td colspan="3">88 ns/order · 11.2 M/s</td><td>—</td></tr>
-    <tr><td>Engine, 4 producers</td><td colspan="3">23.9 ns/order · 41.9 M/s</td><td>—</td></tr>
-    <tr><td>402 challenge incl. CDP verify</td><td colspan="3">2,953 ms (engine adds &lt; 0.2 ms)</td><td>—</td></tr>
+    <tr><th>Test</th><th>p50</th><th>Rate</th></tr>
+    <tr><td>Server, 1 keep-alive connection (local)</td><td>0.25 ms</td><td>4,000 req/s</td></tr>
+    <tr><td>Server, 8 keep-alive connections (local)</td><td>0.53 ms</td><td>11,600 req/s</td></tr>
+    <tr><td>Public endpoint, keep-alive (tunnel)</td><td>80 ms</td><td>78 req/s (8 conns)</td></tr>
+    <tr><td>Public endpoint, new connection</td><td>175 ms</td><td>9.8 req/s</td></tr>
+    <tr><td>Paid call end to end (warm)</td><td>345 ms</td><td>—</td></tr>
+    <tr><td>Engine, 1 producer</td><td colspan="2">88 ns/order · 11.2 M orders/s</td></tr>
+    <tr><td>Engine, 4 producers</td><td colspan="2">23.9 ns/order · 41.9 M orders/s</td></tr>
   </table>
-  <p><a href="./bench.json">Raw data</a>, measured 2026-11-25 with
-  <code>bench_publico.py --n 200 --c 8</code>. Public latency is the tunnel edge, not the engine.</p>
+  <p><a href="./bench.json">Raw data</a>, measured 2026-11-25. Public latency is the
+  tunnel round trip (2 × ~40 ms to the edge); the server answers in 0.25 ms.
+  <a href="./guards.html">How the other x402 guards compare, measured the same day →</a></p>
 
   <h2>What it saves</h2>
   <table>

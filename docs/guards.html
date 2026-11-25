@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>x402 guards measured: price and latency (2026-11-25)</title>
+<meta name="description" content="What x402 guard endpoints charge and how fast they answer a 402, measured from the same machine on 2026-11-25. Method and raw numbers included.">
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #0b0f14; color: #dbe4ee;
+         font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; }
+  main { max-width: 880px; margin: 0 auto; padding: 48px 20px 80px; }
+  h1 { font-size: 30px; line-height: 1.2; margin: 0 0 8px; }
+  h2 { font-size: 19px; margin: 36px 0 10px; color: #9fd0ff; }
+  p, li { color: #b9c6d4; }
+  .sub { color: #7f8fa1; margin: 0 0 28px; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid #1d2733; vertical-align: top; }
+  th { color: #8ea3b8; font-weight: 600; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  code { background: #121a24; padding: 1px 5px; border-radius: 4px; font-size: 13.5px; }
+  pre { background: #0f1620; border: 1px solid #1d2733; border-radius: 10px;
+        padding: 14px 16px; overflow-x: auto; font-size: 13px; color: #cfe0f2; }
+  a { color: #6fb3ff; }
+  .us { background: #101b29; }
+  .note { color: #7f8fa1; font-size: 13.5px; }
+  .tag { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 12px;
+         background: #16324a; color: #9fd0ff; margin-left: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>x402 guards: what they charge and how fast they answer</h1>
+  <p class="sub">Measured 2026-11-25 from one machine in Spain. One sample per endpoint, empty POST to the paid route. This is a snapshot, not a quality ranking.</p>
+
+  <p>If your agent is about to spend, every x402 "guard" answers the same first question: an unpaid request returns HTTP 402 with a price. The difference is what it costs, how fast it answers, and what it can actually decide. We probed the guard endpoints listed on x402scan with an empty body and recorded the challenge.</p>
+
+  <h2>Price of one call and latency of the 402</h2>
+  <table>
+    <thead><tr><th>endpoint</th><th>price / call</th><th>402 latency</th><th>docs</th><th>notes</th></tr></thead>
+    <tbody>
+      <tr class="us">
+        <td>A2P-32 Guard<br><span class="note">zealous-unburned-tameness.ngrok-free.dev</span></td>
+        <td class="num">$0.001 promo<br>$0.005 up to 30 actions</td>
+        <td class="num">80 ms<br><span class="note">keep-alive</span></td>
+        <td>llms.txt, skill.md, OpenAPI, MCP</td>
+        <td>atomic batch of up to 256 limit actions, 10 free calls/day, latch</td>
+      </tr>
+      <tr>
+        <td>agent-guard<br><span class="note">agent-guard.annushka1190.workers.dev</span></td>
+        <td class="num">$0.001 – $0.04<br><span class="note">per route</span></td>
+        <td class="num">78–81 ms</td>
+        <td>llms.txt, OpenAPI, MCP</td>
+        <td>10 utilities: address, IBAN, JSON repair, PII, scam scan, wallet risk</td>
+      </tr>
+      <tr>
+        <td>presign-guard<br><span class="note">presign-guard.fizzl.eu</span></td>
+        <td class="num">$0.01 – $0.15<br><span class="note">per call</span></td>
+        <td class="num">387 ms</td>
+        <td>llms.txt, skill.md, OpenAPI, MCP</td>
+        <td>pre-sign checks, 9 chains, signed receipts, fix codes</td>
+      </tr>
+      <tr>
+        <td>leakguard<br><span class="note">leakguard.agentgate.workers.dev</span></td>
+        <td class="num">—</td>
+        <td class="num">404 on <code>/</code></td>
+        <td>none</td>
+        <td>paid route not at the root; discover via its own docs</td>
+      </tr>
+      <tr>
+        <td>pkgguard<br><span class="note">pkgguard.agentgate.workers.dev</span></td>
+        <td class="num">—</td>
+        <td class="num">404 on <code>/</code></td>
+        <td>none</td>
+        <td>same</td>
+      </tr>
+      <tr>
+        <td>guard.safepay402.com</td>
+        <td class="num">—</td>
+        <td class="num">no connection</td>
+        <td>—</td>
+        <td>did not answer from this network at the time of the probe</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="note">Latency is the round trip to the endpoint's edge, not the service's internal work. A guard on a worker edge (78 ms) and a guard behind a tunnel (80 ms) look the same from here; the second one pays two hops.</p>
+
+  <h2>Check any x402 endpoint yourself</h2>
+  <p>The challenge is the first thing any agent sees, and you can read it with one request:</p>
+  <pre>curl -s -X POST https://&lt;host&gt;/&lt;paid-route&gt; \
+  -H 'Content-Type: application/json' -d '{}' | head -c 400</pre>
+  <p>A v2 answer carries <code>accepts[0].amount</code> (USDC units, 6 decimals), <code>accepts[0].network</code>, <code>accepts[0].payTo</code> and <code>extra.name/version</code> (the EIP-712 domain). If the body has no <code>accepts</code>, it is not an x402 v2 paywall.</p>
+
+  <h2>What the price does not tell you</h2>
+  <ul>
+    <li><strong>What it can decide.</strong> A per-call check answers one question; a batch guard answers a set of limit changes atomically (all applied or none).</li>
+    <li><strong>State.</strong> A stateless check cannot enforce a daily budget across calls; it needs per-tenant state and a circuit breaker.</li>
+    <li><strong>Free trial.</strong> A buyer without a wallet converts on a free call, not on a cheaper price. A2P-32 gives 10 free calls a day per IP that grow with consecutive use.</li>
+    <li><strong>Failure mode.</strong> When a violation trips a lock, ask what happens next: a 402 with a reason, or a silent failure.</li>
+  </ul>
+
+  <h2>Our numbers, same machine, same method</h2>
+  <pre>server, 8 keep-alive connections   0.53 ms p50   11,600 req/s
+public endpoint, keep-alive        80 ms p50     78 req/s (8 connections)
+public endpoint, new connection   175 ms p50      9.8 req/s
+paid call end to end (warm)       345 ms
+engine, 1 producer                 88 ns/order  11.2 M orders/s
+engine, 4 producers                23.9 ns/order 41.9 M orders/s</pre>
+  <p class="note">Raw method and failures included on purpose: a comparison you cannot reproduce is marketing.</p>
+
+  <p><a href="./">A2P-32 Guard</a> · <a href="https://github.com/aymanesamhi1234-collab/a2p32-mcp">client repo</a> · <a href="https://zealous-unburned-tameness.ngrok-free.dev/llms.txt">llms.txt</a></p>
+</main>
+</body>
+</html>
