@@ -6,6 +6,15 @@ A spend and limit firewall for autonomous agents: it approves or blocks an
 action **before** it happens, and a batch either applies completely or not at
 all. Hosted service; this repository contains only the MCP client.
 
+## Listed on
+
+- [Cursor Directory](https://cursor.directory/plugins/a2p-32-guard) (verification pending)
+- [Glama connector](https://glama.ai/mcp/connectors/org.duckdns.a2p32guard/a2p32-guard)
+- Official MCP registry: `org.duckdns.a2p32guard/a2p32-guard`
+- [agent-tools.cloud](https://agent-tools.cloud/a2a/agents/a2p-32-deterministic-guard) (MCP + A2A)
+- x402scan · Agent Bazaar · scriptmaster x402 directory
+- mcp.directory · mcpservers.org (in review) · Docker MCP Registry (PR #7701)
+
 ## Connect in one line
 
 ```bash
