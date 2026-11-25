@@ -7,6 +7,7 @@ The first 5 actions of a call are free, so these snippets work with no wallet.
 |---|---|---|
 | LangChain (Python) | `langchain_guard.py` | `@tool guard_batch(orders)` calls the guard and returns its decision |
 | Vercel AI SDK (TS) | `vercel_ai_sdk.ts` | `guardBatch` tool with a zod schema for `orders` |
+| Open WebUI | `openwebui_spend_guard.py` | paste into Workspace → Tools; adds `guard_batch` (standard Tools interface, not yet exercised inside Open WebUI) |
 | MCP clients | any | add `https://zealous-unburned-tameness.ngrok-free.dev/mcp` as a streamable-http server |
 
 Order shape:
