@@ -85,6 +85,9 @@ on top of the trip.
 Raw data: `/bench.json` on the endpoint.
 
 
+Measured comparison of the guard endpoints in this market (price and 402
+latency, same machine, same day): <https://aymanesamhi1234-collab.github.io/a2p32-mcp/guards.html>
+
 ## What it saves
 
 | case | without | with | saving |
