@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>A2P-32 Guard — spend and limit firewall for agents</title>
-<meta name="description" content="Approve or block an agent action before it happens: budget, per-call cap, rate, writes and transfers, all-or-nothing. Remote MCP, free trial, paid per decision in USDC on Base via x402.">
+<meta name="description" content="Approve or block an agent action before it happens: budget, hard cap, rate, writes and transfers, all-or-nothing. Remote MCP, free trial, paid per decision in USDC on Base via x402.">
 <link rel="icon" href="./logo.svg" type="image/svg+xml">
 <style>
   :root{--bg:#0b1020;--fg:#e8eefc;--dim:#8fa3bf;--acc:#5ef2c0;--line:#1d2740;--card:#111a30}
@@ -64,7 +64,7 @@
   </header>
 
   <p class="sub">A spend and limit firewall for autonomous agents. It approves or blocks an
-  action <b>before</b> it happens — daily budget, per-call cap, rate, writes, transfers and
+  action <b>before</b> it happens — daily budget, hard cap, rate, writes, transfers and
   sessions — and a batch either applies completely or not at all.</p>
 
   <div class="grid">
@@ -153,8 +153,7 @@ curl -s -X POST https://zealous-unburned-tameness.ngrok-free.dev/ \
   <h2>What it enforces</h2>
   <table>
     <tr><th>Limit</th><th>What it stops</th></tr>
-    <tr><td>Daily budget (USD)</td><td>an agent spending past its allowance</td></tr>
-    <tr><td>Per-call cap</td><td>one expensive call blowing the budget</td></tr>
+    <tr><td>Budget + hard cap</td><td>spending past the allowance: any batch that would leave spend above the cap is rejected whole</td></tr>
     <tr><td>API rate</td><td>runaway loops hammering a paid API</td></tr>
     <tr><td>Write quota</td><td>unbounded database writes</td></tr>
     <tr><td>Transfer cap</td><td>large outbound transfers</td></tr>

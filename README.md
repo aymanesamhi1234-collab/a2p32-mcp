@@ -54,8 +54,21 @@ header, so the first tool call just works. The free quota grows with daily use:
 | `a2p3_ledger` | usage and simulated billing | free |
 | `a2p3_guard` | apply a batch of orders (returns the paid endpoint) | x402 |
 
-Limits you can enforce: daily budget, API rate, write quota, transfer cap,
-token burn, queue batch size, retry loop and session lock.
+Limits you can enforce: daily budget with a hard cap, API rate, write quota,
+transfer cap, token burn, queue batch size, retry loop and session lock.
+
+The cap is enforced by the engine, not by the caller. A batch that would leave
+spend above the cap is rejected whole:
+
+```json
+{"orders":[{"root":"BUDGET.CAP","action":"SET","value_dec":10},
+           {"root":"BUDGET.USD","action":"INCREASE","value_dec":6}]}
+```
+```json
+{"orders":[{"root":"BUDGET.USD","action":"INCREASE","value_dec":6}]}
+```
+The second batch returns `M` and applies nothing: 6 + 6 > 10. Setting `CAP` to 0
+means no cap.
 
 ## Use it from your agent
 
