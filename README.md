@@ -99,6 +99,24 @@ EIP-3009 signatures settled by the Coinbase CDP facilitator: no account, no API
 key, no gas for the buyer. Discovery: `/.well-known/agent.json`,
 `/.well-known/x402`, `/openapi.json`, `/llms.txt`.
 
+### Paying from your own code
+
+`guardpay.py` puts the guard in front of the payment: it reads the 402 price,
+refuses locally if it exceeds your cap, asks the free preflight whether the
+amount fits the remaining budget, and only then signs and retries.
+
+```python
+from guardpay import GuardPay
+gp = GuardPay(budget_usd=25, key=os.environ["EVM_KEY"])
+r = gp.pay("https://zealous-unburned-tameness.ngrok-free.dev/", body={...}, max_usd=0.01)
+```
+
+Troubleshooting: if the payer account has code on Base (an EIP-7702 delegation
+or a contract), USDC validates the signature through ERC-1271 and rejects a
+plain EOA signature, so the facilitator answers `invalid_exact_evm_payload_signature`.
+`guardpay` checks `eth_getCode` before signing and refuses with a clear message
+instead of burning the attempt. Use a clean EOA to pay.
+
 ## Bridge (optional, stdio clients)
 
 No dependencies beyond the Python standard library (3.10+).
