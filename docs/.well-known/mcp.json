@@ -1,0 +1,35 @@
+{
+  "serverInfo": {
+    "name": "a2p32-guard",
+    "version": "3.2",
+    "title": "A2P-32 Guard",
+    "description": "Spend and limit firewall for autonomous agents. Approve or block an action before it happens: budget, per-call cap, rate, writes, transfers and sessions, all-or-nothing. Free up to 5 actions per call; free trial at /v1/trial.",
+    "homepage": "https://aymanesamhi1234-collab.github.io/a2p32-mcp/"
+  },
+  "transport": {
+    "type": "streamable-http",
+    "url": "https://zealous-unburned-tameness.ngrok-free.dev/mcp",
+    "fallback": "https://a2p32guard.loca.lt/mcp"
+  },
+  "authentication": "none",
+  "tools": [
+    {"name": "a2p3_describe", "description": "limits you can enforce, with their scale"},
+    {"name": "a2p3_guard", "description": "approve or block a batch before it happens; atomic"},
+    {"name": "a2p3_text", "description": "turn a sentence into orders"},
+    {"name": "a2p3_status", "description": "current limits and state"},
+    {"name": "a2p3_ledger", "description": "usage and billing"}
+  ],
+  "prompts": [
+    {"name": "budget-check", "description": "decide whether a payment fits the budget before spending"},
+    {"name": "spend-guard", "description": "set a daily budget and a per-call cap"}
+  ],
+  "payment": {
+    "protocol": "x402",
+    "network": "eip155:8453",
+    "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "payTo": "0xf4bA636Dafc0A10fD0D231c2ff6cd36503ac36c9",
+    "from_usdc": "0.0010",
+    "free": "up to 5 actions per call"
+  },
+  "registry": "org.duckdns.a2p32guard/a2p32-guard"
+}
