@@ -1,5 +1,7 @@
 # A2P-32 Guard — MCP client
 
+[![A2P-32 Guard MCP connector](https://glama.ai/mcp/connectors/org.duckdns.a2p32guard/a2p32-guard/badges/score.svg)](https://glama.ai/mcp/connectors/org.duckdns.a2p32guard/a2p32-guard)
+
 A thin MCP (stdio) bridge for **A2P-32 Guard**, a hosted service that acts as a
 spend and limit firewall for autonomous agents: it approves or blocks an action
 before it happens, and batches either apply completely or not at all.
