@@ -1,0 +1,33 @@
+name: endpoint health
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: healthz answers 200
+        run: |
+          code=$(curl -s -o /tmp/health -w "%{http_code}" --max-time 20 \
+            https://zealous-unburned-tameness.ngrok-free.dev/healthz)
+          cat /tmp/health
+          test "$code" = "200"
+
+      - name: MCP initialize answers serverInfo
+        run: |
+          curl -s --max-time 20 -X POST \
+            https://zealous-unburned-tameness.ngrok-free.dev/mcp \
+            -H 'Content-Type: application/json' \
+            -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}' \
+            | tee /tmp/init | grep -q '"serverInfo"'
+          cat /tmp/init
+
+      - name: free preflight answers allow
+        run: |
+          curl -s --max-time 20 \
+            "https://zealous-unburned-tameness.ngrok-free.dev/v1/check?budget=50&spent=12.4&amount=0.05" \
+            | tee /tmp/check | grep -q '"allow"'
+          cat /tmp/check

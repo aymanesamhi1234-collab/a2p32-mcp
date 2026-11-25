@@ -1,6 +1,7 @@
 # A2P-32 Guard — MCP client
 
 [![A2P-32 Guard MCP connector](https://glama.ai/mcp/connectors/org.duckdns.a2p32guard/a2p32-guard/badges/score.svg)](https://glama.ai/mcp/connectors/org.duckdns.a2p32guard/a2p32-guard)
+[![endpoint health](https://github.com/aymanesamhi1234-collab/a2p32-mcp/actions/workflows/health.yml/badge.svg)](https://github.com/aymanesamhi1234-collab/a2p32-mcp/actions/workflows/health.yml)
 
 A spend and limit firewall for autonomous agents: it approves or blocks an
 action **before** it happens, and a batch either applies completely or not at
