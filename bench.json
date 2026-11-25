@@ -1,0 +1,41 @@
+{
+  "measured_at": "2026-11-25T12:35:00+01:00",
+  "method": "bench_publico.py --n 200 --c 8 (Python urllib, no keep-alive)",
+  "public": {
+    "host": "cloudflare quick tunnel -> 127.0.0.1:8890",
+    "samples": 200,
+    "p50_ms": 94.1,
+    "p95_ms": 126.0,
+    "p99_ms": 178.3,
+    "req_s": 9.8
+  },
+  "local": {
+    "host": "127.0.0.1:8890",
+    "samples": 200,
+    "p50_ms": 1.8,
+    "p95_ms": 3.4,
+    "p99_ms": 5.6,
+    "req_s": 412.7
+  },
+  "engine": {
+    "orders_per_s_1_producer": 11200000,
+    "orders_per_s_4_producers_batches_32": 41900000,
+    "ns_per_order_1_producer": 88,
+    "ns_per_order_4_producers": 23.9
+  },
+  "payment": {
+    "x402_challenge_with_cdp_verify_ms": 2953,
+    "engine_share_of_that_ms": 0.16
+  },
+  "price_usdc": {
+    "simulate": 0,
+    "promo_first_50_day": 0.001,
+    "up_to_30_actions": 0.005,
+    "31_to_256_actions": 0.015
+  },
+  "notes": [
+    "public latency is dominated by the tunnel edge, not by the engine",
+    "simulate is rate limited to 120 requests per minute per IP",
+    "payment latency is the CDP facilitator verify call; the engine adds under 0.2 ms"
+  ]
+}

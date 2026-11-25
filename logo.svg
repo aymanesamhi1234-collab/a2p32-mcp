@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <rect width="400" height="400" rx="72" fill="#0b1020"/>
+  <path d="M200 58 L322 106 V208 C322 272 268 320 200 342 C132 320 78 272 78 208 V106 Z"
+        fill="none" stroke="#5ef2c0" stroke-width="16" stroke-linejoin="round"/>
+  <path d="M144 206 L188 250 L264 156" fill="none" stroke="#5ef2c0" stroke-width="22"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="200" y="386" font-family="Helvetica, Arial, sans-serif" font-size="30"
+        letter-spacing="2" fill="#8fa3bf" text-anchor="middle">A2P-32</text>
+</svg>
