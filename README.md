@@ -1,9 +1,8 @@
 # A2P-32 Guard — MCP client
 
-A thin MCP (stdio) bridge for **A2P-32 Guard**, a hosted service that gives
-autonomous agents deterministic governance: spend budgets, rate limits, write
-quotas and transfer caps enforced as **per-aspect limits**, with batches that
-either apply completely or not at all.
+A thin MCP (stdio) bridge for **A2P-32 Guard**, a hosted service that acts as a
+spend and limit firewall for autonomous agents: it approves or blocks an action
+before it happens, and batches either apply completely or not at all.
 
 This package contains **only the client**. The engine runs behind the hosted
 endpoint; there is no engine code here.
@@ -12,14 +11,14 @@ endpoint; there is no engine code here.
 
 | tool | what it does | price |
 |---|---|---|
-| `a2p3_describe` | roots, scales and limits available to you | free |
+| `a2p3_describe` | limits you can enforce, with their scale | free |
 | `a2p3_status` | current values and state of a tenant | free |
 | `a2p3_text` | turn a sentence into orders | free |
 | `a2p3_ledger` | usage and simulated billing | free |
 | `a2p3_guard` | apply a batch of orders (returns the paid endpoint) | x402 |
 
-Roots: `BUDGET.USD`, `API.RATE`, `DB.WRITE`, `TRANSFER.LIMIT`, `TOKEN.BURN`,
-`QUEUE.BATCH`, `RETRY.LOOP`, `SESSION.LOCK`.
+Limits you can enforce: daily budget, API rate, write quota, transfer cap,
+token burn, queue batch size, retry loop and session lock.
 
 ## Install
 
