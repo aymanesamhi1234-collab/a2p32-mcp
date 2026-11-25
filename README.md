@@ -148,6 +148,20 @@ plain EOA signature, so the facilitator answers `invalid_exact_evm_payload_signa
 `guardpay` checks `eth_getCode` before signing and refuses with a clear message
 instead of burning the attempt. Use a clean EOA to pay.
 
+### Paying from an agent that already uses x402
+
+`integrations/x402_fetch_guard.ts` wraps the official v2 client (`@x402/fetch`)
+with a cumulative daily budget, so an agent loop cannot drain the wallet:
+
+```ts
+const fetchPaid = guardFetch({ account, chain: "eip155:8453", budgetUsd: 5, maxPerCallUsd: 0.05 });
+```
+
+Verified against this service on Base Sepolia with the real client: two paid
+calls returned 200 with a settlement hash, the third was refused locally
+(`daily budget: spent 0.002 + 0.001 > 0.0025`), a 31-action batch was refused by
+the per-call cap, and a free call never touched the budget.
+
 ## Bridge (optional, stdio clients)
 
 No dependencies beyond the Python standard library (3.10+).
