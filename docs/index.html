@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A2P-32 Guard — spend and limit firewall for agents</title>
+<meta name="description" content="Approve or block an agent action before it happens: budget, per-call cap, rate, writes and transfers, all-or-nothing. Remote MCP, free trial, paid per decision in USDC on Base via x402.">
+<link rel="icon" href="./logo.svg" type="image/svg+xml">
+<style>
+  :root{--bg:#0b1020;--fg:#e8eefc;--dim:#8fa3bf;--acc:#5ef2c0;--line:#1d2740;--card:#111a30}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif}
+  .wrap{max-width:900px;margin:0 auto;padding:56px 22px 80px}
+  header{display:flex;gap:18px;align-items:center;margin-bottom:8px}
+  header img{width:72px;height:72px;border-radius:16px}
+  h1{font-size:34px;margin:0;letter-spacing:-.5px}
+  .sub{color:var(--dim);font-size:17px;margin:10px 0 30px}
+  h2{font-size:20px;margin:38px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  pre{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;overflow:auto;font-size:14px}
+  code{background:var(--card);padding:2px 6px;border-radius:6px;font-size:14px}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:15px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--dim);font-weight:600}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:22px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .card b{display:block;font-size:22px;color:var(--acc)}
+  .card span{color:var(--dim);font-size:13px}
+  a{color:var(--acc)}
+  footer{margin-top:48px;color:var(--dim);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+  .pill{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px;color:var(--dim);margin-right:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="./logo.png" alt="A2P-32 Guard">
+    <div>
+      <h1>A2P-32 Guard</h1>
+      <div class="pill">remote MCP</div><div class="pill">x402 on Base</div><div class="pill">free trial</div>
+    </div>
+  </header>
+
+  <p class="sub">A spend and limit firewall for autonomous agents. It approves or blocks an
+  action <b>before</b> it happens — daily budget, per-call cap, rate, writes, transfers and
+  sessions — and a batch either applies completely or not at all.</p>
+
+  <div class="grid">
+    <div class="card"><b>1.8 ms</b><span>p50 local · 412 req/s</span></div>
+    <div class="card"><b>94 ms</b><span>p50 public (tunnel edge)</span></div>
+    <div class="card"><b>11.2 M/s</b><span>orders in the engine</span></div>
+    <div class="card"><b>0.0010 USDC</b><span>per decision, no gas</span></div>
+  </div>
+
+  <h2>Connect</h2>
+<pre>claude mcp add --transport http a2p32 https://zealous-unburned-tameness.ngrok-free.dev/mcp</pre>
+  <p>Or any streamable-HTTP MCP client:</p>
+<pre>{ "mcpServers": { "a2p32-guard": {
+  "url": "https://zealous-unburned-tameness.ngrok-free.dev/mcp" } } }</pre>
+  <p>Fallback endpoint if the primary is unreachable:
+  <code>https://a2p32guard.loca.lt/mcp</code></p>
+
+  <h2>Try without a wallet</h2>
+<pre>curl -s https://zealous-unburned-tameness.ngrok-free.dev/v1/trial
+# {"token":"...","calls":10,"left":10}
+curl -s -X POST https://zealous-unburned-tameness.ngrok-free.dev/ \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer trial:YOUR-TOKEN' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"SendMessage","params":{"message":{
+       "messageId":"t1","role":"ROLE_USER","parts":[{"data":{"orders":[
+       {"root":"BUDGET.USD","action":"SET","value_dec":5}]}}]}}}'</pre>
+  <p>MCP clients get the same 10 free <code>a2p3_guard</code> calls per IP and day
+  without any header: the first tool call just works.</p>
+
+  <h2>What it enforces</h2>
+  <table>
+    <tr><th>Limit</th><th>What it stops</th></tr>
+    <tr><td>Daily budget (USD)</td><td>an agent spending past its allowance</td></tr>
+    <tr><td>Per-call cap</td><td>one expensive call blowing the budget</td></tr>
+    <tr><td>API rate</td><td>runaway loops hammering a paid API</td></tr>
+    <tr><td>Write quota</td><td>unbounded database writes</td></tr>
+    <tr><td>Transfer cap</td><td>large outbound transfers</td></tr>
+    <tr><td>Retry loop / session lock</td><td>retry storms and sessions that should stop</td></tr>
+  </table>
+
+  <h2>Numbers (measured)</h2>
+  <table>
+    <tr><th>Test</th><th>p50</th><th>p95</th><th>p99</th><th>Rate</th></tr>
+    <tr><td>Public (tunnel edge)</td><td>94.1 ms</td><td>126.0 ms</td><td>178.3 ms</td><td>9.8 req/s</td></tr>
+    <tr><td>Local</td><td>1.8 ms</td><td>3.4 ms</td><td>5.6 ms</td><td>412.7 req/s</td></tr>
+    <tr><td>Engine, 1 producer</td><td colspan="3">88 ns/order · 11.2 M/s</td><td>—</td></tr>
+    <tr><td>Engine, 4 producers</td><td colspan="3">23.9 ns/order · 41.9 M/s</td><td>—</td></tr>
+    <tr><td>402 challenge incl. CDP verify</td><td colspan="3">2,953 ms (engine adds &lt; 0.2 ms)</td><td>—</td></tr>
+  </table>
+  <p><a href="./bench.json">Raw data</a>, measured 2026-11-25 with
+  <code>bench_publico.py --n 200 --c 8</code>. Public latency is the tunnel edge, not the engine.</p>
+
+  <h2>Pricing</h2>
+  <table>
+    <tr><th>Operation</th><th>Price</th><th>Note</th></tr>
+    <tr><td>Simulate</td><td>0 USDC</td><td>validate without executing, 120/min</td></tr>
+    <tr><td>First 50 decisions of the UTC day</td><td>0.0010 USDC</td><td>promo</td></tr>
+    <tr><td>Up to 30 actions</td><td>0.0050 USDC</td><td>standard</td></tr>
+    <tr><td>31–256 actions</td><td>0.0150 USDC</td><td>large batch</td></tr>
+  </table>
+  <p>x402 v2, exact scheme, EIP-3009. The Coinbase CDP facilitator verifies and settles;
+  the buyer pays no gas and needs no account.</p>
+
+  <h2>Where to find it</h2>
+  <ul>
+    <li><a href="https://github.com/aymanesamhi1234-collab/a2p32-mcp">GitHub repository</a> (client only, MIT)</li>
+    <li><a href="https://glama.ai/mcp/connectors/org.duckdns.a2p32guard/a2p32-guard">Glama connector</a></li>
+    <li>Official MCP registry: <code>org.duckdns.a2p32guard/a2p32-guard</code></li>
+  </ul>
+
+  <footer>A2P-32 Guard · hosted service · engine not distributed · © 2026</footer>
+</div>
+</body>
+</html>
