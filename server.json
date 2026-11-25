@@ -1,13 +1,13 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "org.duckdns.a2p32guard/a2p32-guard",
-  "description": "Per-aspect limits for agent budgets, API rates and transfers; atomic batches.",
-  "version": "3.2.0",
+  "description": "Spend/limit firewall for agents: block over-budget, rate, write or transfer actions. Free to try.",
+  "version": "3.2.1",
   "repository": {
     "url": "https://github.com/aymanesamhi1234-collab/a2p32-mcp",
     "source": "github"
   },
-  "websiteUrl": "https://zealous-unburned-tameness.ngrok-free.dev",
+  "websiteUrl": "https://aymanesamhi1234-collab.github.io/a2p32-mcp/",
   "license": "MIT",
   "remotes": [
     {
