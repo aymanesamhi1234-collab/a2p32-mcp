@@ -78,26 +78,39 @@
   <p style="color:var(--dim)">Live traffic: <span id="stats">…</span></p>
 
   <script>
-  const API = "https://zealous-unburned-tameness.ngrok-free.dev";
+  // El túnel de ngrok muestra un aviso a los navegadores; probamos hosts hasta dar con uno que responda.
+  const CANDIDATES = [
+    "https://appointments-butterfly-dressed-houston.trycloudflare.com",
+    "https://a2p32guard.loca.lt",
+    "https://zealous-unburned-tameness.ngrok-free.dev"];
+  let API = null;
+  async function api() {
+    if (API) return API;
+    for (const u of CANDIDATES) {
+      try { const r = await fetch(u + "/healthz", {cache: "no-store"}); if (r.ok) { API = u; return u; } }
+      catch (e) {}
+    }
+    throw new Error("no reachable host");
+  }
   document.getElementById("go").onclick = async () => {
     const q = new URLSearchParams({
       budget: document.getElementById("b").value,
       spent: document.getElementById("s").value,
       amount: document.getElementById("a").value});
     try {
-      const r = await fetch(API + "/v1/check?" + q);
+      const r = await fetch((await api()) + "/v1/check?" + q);
       document.getElementById("out").textContent = JSON.stringify(await r.json(), null, 1);
-    } catch (e) { document.getElementById("out").textContent = "error: " + e; }
+    } catch (e) { document.getElementById("out").textContent = "error: " + e + " — usa el endpoint de Connect"; }
   };
   document.getElementById("sav").onclick = async () => {
     try {
-      const r = await fetch(API + "/v1/savings?actions=30");
+      const r = await fetch((await api()) + "/v1/savings?actions=30");
       const d = await r.json();
       document.getElementById("savout").textContent =
         d.tokens.saved + " tokens saved (" + d.tokens.factor + "x)";
     } catch (e) { document.getElementById("savout").textContent = "error: " + e; }
   };
-  fetch(API + "/stats").then(r => r.json()).then(d => {
+  api().then(u => fetch(u + "/stats")).then(r => r.json()).then(d => {
     document.getElementById("stats").textContent =
       d.handshakes + " handshakes from " + Object.keys(d.clients).length + " clients";
   }).catch(() => {});
